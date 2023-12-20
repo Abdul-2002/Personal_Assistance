@@ -1,9 +1,18 @@
+# The above code defines a class called `main` that acts as a virtual assistant and performs various
+# tasks such as opening applications, searching the web, taking screenshots, and more.
+# The line `from typing_extensions import Self` is importing the `Self` type hint from the
+# `typing_extensions` module. The `Self` type hint is used to indicate that a method's return type
+# should be the same as the class it belongs to.
+# The line `from pylab import rcParams` is importing the `rcParams` object from the `pylab` module.
+# `rcParams` is a dictionary-like object that stores the default settings for various plot parameters
+# in Matplotlib. By importing `rcParams`, you can access and modify these default settings to
 from typing_extensions import Self
 from fnmatch import translate
 from unittest import result
 from IPython.display import Image
 from playsound import playsound
-from pylab import rcParams
+
+# customize your plots.
 from googletrans import Translator
 from subprocess import call
 import pywhatkit
@@ -107,46 +116,12 @@ class class_schedule:
         monlist = [class1,class2,class3,class4]
         return monlist
 
-    def tue(self):
-        
-        tuelist = self.mon()
-        return tuelist
-    
-    def wed(self):
-
-        wedlist = self.mon()
-        return wedlist
-
-    def thur(self):
-        class1 = [8,30,10,00,"PLA CLASS"]
-        class2 = [13,15,14,45,"Artificial Neural Networks"]
-        class3 = [14,50,16,20,"Artificial Neural Networks"]
-        class4 = [16,25,17,55,"Data Mining And Data"]
-        
-        thurlist = [class1,class2,class3,class4]
-        return thurlist
-
-    def fri(self):
-        class1 = [8,30,10,00,"PLA CLASS"]
-        class2 = [13,15,14,45,"Artificial Neural Networks"]
-        class3 = [16,25,17,55,"Data Mining And Data"]
-        frilist = [class1,class2,class3]
-        return frilist
-
     def check_day_and_no_of_class(self):
         if (datetime.datetime.now().strftime('%A') == "Monday"):
             return class_schedule().mon()
-        if (datetime.datetime.now().strftime('%A') == "Tuesday"):
-            return class_schedule().tue()
-        if (datetime.datetime.now().strftime('%A') == "Wednesday"):
-            return class_schedule().wed()
-        if (datetime.datetime.now().strftime('%A') == "Thursday"):
-            return class_schedule().thur()
-        if (datetime.datetime.now().strftime('%A') == "Friday"):
-            return class_schedule().fri()
         else:
             return []
-   
+        
     def check_if_there_is_class(self,classes_today):
         if classes_today  == []:
             return
@@ -269,19 +244,54 @@ class close:
             os.system("TASKKILL /F /im Microsoft.Photos.exe ")
         return
 
+class MailClient:
+    def __init__(self):
+        self.imap_host = 'imap.gmail.com'
+        self.imap_port = 993
+        self.mail = imaplib.IMAP4_SSL(self.imap_host, self.imap_port)
+        self.mail.login("abdul.aziz2020@vitbhopal.ac.in", "kojrkjlxfxhtdndi")
+        self.mail.select("inbox")
+
+    def check_for_new_mail(self):
+        result, data = self.mail.search(None, "UNSEEN")
+        if result == 'OK':
+            email_ids = data[0].split()
+            return len(email_ids) > 0  # Return True if there are unseen emails, otherwise False
+        return False
+        
+    def fetch_and_print_new_mail(self):
+        result, data = self.mail.search(None, "UNSEEN")
+        email_ids = data[0].split()
+        for email_id in email_ids:
+            result, data = self.mail.fetch(email_id, "(RFC822)")
+            if result == 'OK':
+                raw_email = data[0][1]
+                email_message = email.message_from_bytes(raw_email)
+                # Get the sender and subject of the email
+                sender = email.utils.parseaddr(email_message['From'])[1]
+                subject = email_message['Subject']
+                # Print the details of the email
+                print(f"New email from {sender} with subject: {subject}")
+
+    def close_connection(self):
+        self.mail.close()
+        self.mail.logout()
+    
+
 if __name__ == "__main__":
     main().wishMe()
 
     main().speak(f" Today is   "+(datetime.datetime.now().strftime('%A')))
     print(f"  Today is "+(datetime.datetime.now().strftime('%A')))
 
-    today_classes = class_schedule().check_day_and_no_of_class()
-
-    main().speak(f" and you have "+((str)(len(today_classes)))+" classes")
-    print(f" and you have "+((str)(len(today_classes)))+" classes")
+    #today_classes = class_schedule().check_day_and_no_of_class()
+    #main().speak(f" and you have "+((str)(len(today_classes)))+" classes")
+    #print(f" and you have "+((str)(len(today_classes)))+" classes")
 
     while True:
-        class_schedule().check_if_there_is_class(today_classes)
+        #class_schedule().check_if_there_is_class(today_classes)
+        if(MailClient().check_for_new_mail>0):
+            print("You have a new mail")
         hellocomp = main().takeCommand().lower()
         if hellocomp == 'hello computer':
             main().main()
